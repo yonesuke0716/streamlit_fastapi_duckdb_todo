@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+duckdb
+streamlit
+httpx
+pydantic
+sqlalchemy
+duckdb-engine
