@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException
-from database import SessionLocal
+from database import SessionLocal, create_tables
 from typing import List
-
+import uvicorn
 from models import TodoModel, Todo
 
 app = FastAPI()
+# アプリケーション起動時にテーブルを作成
+create_tables()
 
 
 # データベースセッション依存関係
@@ -97,3 +99,7 @@ def delete_todo(todo_id: int):
         return {"result": "success"}
     finally:
         db.close()
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

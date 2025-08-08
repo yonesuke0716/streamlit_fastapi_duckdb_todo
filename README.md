@@ -1,6 +1,6 @@
-# FastAPI + DuckDB + Streamlit Todoアプリケーション
+# FastAPI + Streamlit Todoアプリケーション
 
-このプロジェクトは、FastAPI、DuckDB、Streamlitを使用して構築されたTodo管理アプリケーションです。
+このプロジェクトは、FastAPI、DuckDB(SQLite)、Streamlitを使用して構築されたTodo管理アプリケーションです。
 
 ## 機能
 
@@ -14,7 +14,7 @@
 ## 技術スタック
 
 - **バックエンド**: FastAPI
-- **データベース**: DuckDB
+- **データベース**: DuckDB(現状はSQLite、SQLAlchemyをDuckDBと繋ぐ予定)
 - **フロントエンド**: Streamlit
 - **ORM**: SQLAlchemy
 - **データ検証**: Pydantic
@@ -71,7 +71,7 @@ source .venv/bin/activate
 #### バックエンドAPIの起動
 
 ```bash
-uvicorn api_app:app --reload
+python api_app.py
 ```
 
 #### Streamlitアプリケーションの起動
@@ -79,7 +79,7 @@ uvicorn api_app:app --reload
 別のターミナルで以下を実行：
 
 ```bash
-streamlit run streamlit_app.py
+python -m streamlit run streamlit_app.py
 ```
 
 ## 使い方

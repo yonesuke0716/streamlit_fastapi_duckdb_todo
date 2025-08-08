@@ -10,4 +10,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Baseクラス
 Base = declarative_base()
 
-Base.metadata.create_all(bind=engine)
+
+def create_tables():
+    """データベーステーブルを作成する"""
+    Base.metadata.create_all(bind=engine)

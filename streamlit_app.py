@@ -65,11 +65,22 @@ for todo in todos:
         st.write(f"日付: {todo.get('date', '') or ''}")
         col1, col2, col3 = st.columns(3)
         with col1:
-            if st.button("完了切替", key=f"toggle_{todo['id']}"):
+            # ボタンテキストを現在の状態に応じて動的に変更
+            button_text = "未完了に変更" if todo["completed"] else "完了に変更"
+            if st.button(button_text, key=f"toggle_{todo['id']}"):
                 try:
+                    # 現在のTodoの全データを取得し、completedフィールドのみを更新
+                    updated_todo = {
+                        "id": todo["id"],
+                        "title": todo["title"],
+                        "description": todo["description"],
+                        "completed": not todo["completed"],
+                        "priority": todo.get("priority", 1),
+                        "date": todo.get("date"),
+                    }
                     r = httpx.put(
                         f"{API_URL}/{todo['id']}",
-                        json={"completed": not todo["completed"]},
+                        json=updated_todo,
                     )
                     r.raise_for_status()
                     st.success("更新しました！")
