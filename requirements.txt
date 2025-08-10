@@ -1,8 +1,9 @@
 fastapi
 uvicorn
 duckdb
+pandas
+plotly
 streamlit
 httpx
-pydantic
-sqlalchemy
+sqlmodel
 duckdb-engine

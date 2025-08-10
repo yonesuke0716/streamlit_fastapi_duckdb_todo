@@ -1,104 +1,66 @@
-from fastapi import FastAPI, HTTPException
-from database import SessionLocal, create_tables
+from fastapi import FastAPI, HTTPException, Depends
+from sqlmodel import Session, select
 from typing import List
 import uvicorn
-from models import TodoModel, Todo
+from models import Todo
+from database import create_tables, get_session
 
 app = FastAPI()
-# アプリケーション起動時にテーブルを作成
+
 create_tables()
-
-
-# データベースセッション依存関係
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 # CRUDエンドポイント
 @app.get("/todos", response_model=List[Todo])
-def read_todos():
-    db = SessionLocal()
-    try:
-        todos = db.query(TodoModel).all()
-        return [Todo.model_validate(todo) for todo in todos]
-    finally:
-        db.close()
+def read_todos(session: Session = Depends(get_session)):
+    todos = session.exec(select(Todo)).all()
+    return todos
 
 
 @app.get("/todos/{todo_id}", response_model=Todo)
-def read_todo(todo_id: int):
-    db = SessionLocal()
-    try:
-        db_todo = db.query(TodoModel).filter(TodoModel.id == todo_id).first()
-        if not db_todo:
-            raise HTTPException(status_code=404, detail="Todo not found")
-        return Todo.model_validate(db_todo)
-    finally:
-        db.close()
+def read_todo(todo_id: int, session: Session = Depends(get_session)):
+    todo = session.get(Todo, todo_id)
+    if not todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
+    return todo
 
 
 @app.post("/todos", response_model=Todo)
-def create_todo(todo: Todo):
-    db = SessionLocal()
-    try:
-        db_todo = TodoModel(
-            title=todo.title,
-            description=todo.description,
-            completed=todo.completed,
-            priority=todo.priority,
-            date=todo.date,
-        )
-        db.add(db_todo)
-        db.commit()
-        db.refresh(db_todo)
-        return Todo.model_validate(db_todo)
-    finally:
-        db.close()
+def create_todo(todo: Todo, session: Session = Depends(get_session)):
+    session.add(todo)
+    session.commit()
+    session.refresh(todo)
+    return todo
 
 
 @app.put("/todos/{todo_id}", response_model=Todo)
-def update_todo(todo_id: int, todo: Todo):
-    db = SessionLocal()
-    try:
-        db_todo = db.query(TodoModel).filter(TodoModel.id == todo_id).first()
-        if not db_todo:
-            raise HTTPException(status_code=404, detail="Todo not found")
+def update_todo(
+    todo_id: int, todo_update: Todo, session: Session = Depends(get_session)
+):
+    db_todo = session.get(Todo, todo_id)
+    if not db_todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
 
-        if todo.title is not None:
-            db_todo.title = todo.title
-        if todo.description is not None:
-            db_todo.description = todo.description
-        if todo.completed is not None:
-            db_todo.completed = todo.completed
-        if todo.priority is not None:
-            db_todo.priority = todo.priority
-        if todo.date is not None:
-            db_todo.date = todo.date
+    # 更新データを適用（idは除外）
+    todo_data = todo_update.model_dump(exclude={"id"}, exclude_unset=True)
+    for key, value in todo_data.items():
+        setattr(db_todo, key, value)
 
-        db.commit()
-        db.refresh(db_todo)
-        return Todo.model_validate(db_todo)
-    finally:
-        db.close()
+    session.add(db_todo)
+    session.commit()
+    session.refresh(db_todo)
+    return db_todo
 
 
 @app.delete("/todos/{todo_id}")
-def delete_todo(todo_id: int):
-    db = SessionLocal()
-    try:
-        db_todo = db.query(TodoModel).filter(TodoModel.id == todo_id).first()
-        if not db_todo:
-            raise HTTPException(status_code=404, detail="Todo not found")
+def delete_todo(todo_id: int, session: Session = Depends(get_session)):
+    db_todo = session.get(Todo, todo_id)
+    if not db_todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
 
-        db.delete(db_todo)
-        db.commit()
-        return {"result": "success"}
-    finally:
-        db.close()
+    session.delete(db_todo)
+    session.commit()
+    return {"result": "success"}
 
 
 if __name__ == "__main__":
