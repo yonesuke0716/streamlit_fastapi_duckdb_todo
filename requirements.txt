@@ -7,3 +7,4 @@ streamlit
 httpx
 sqlmodel
 duckdb-engine
+python-dotenv

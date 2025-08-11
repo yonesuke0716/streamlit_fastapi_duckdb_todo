@@ -9,12 +9,12 @@
 - 🎯 完了/未完了の切り替え
 - 🎨 直感的なWebインターフェース（Streamlit）
 - 🚀 高速なAPI（FastAPI）
-- 💾 軽量なデータベース（DuckDB）
+- 💾 軽量なデータベース（DuckDB/SQLite）
 
 ## 技術スタック
 
 - **バックエンド**: FastAPI
-- **データベース**: DuckDB
+- **データベース**: DuckDB/SQLite
 - **フロントエンド**: Streamlit
 - **ORM**: SQLModel(SQLAlchemy + Pydantic)
 
@@ -32,7 +32,20 @@ git clone <repository-url>
 cd streamlit_fastapi_duckdb_todo
 ```
 
-### 2. 依存関係のインストール
+### 2. 環境変数の設定
+
+プロジェクトルートに`.env`ファイルを作成し、データベース設定を指定します：
+
+```bash
+# .envファイル
+# DuckDBを使用する場合
+DATABASE_URL=duckdb:///todos_duckdb.db
+
+# SQLiteを使用する場合
+# DATABASE_URL=sqlite:///todos_sqlite.db
+```
+
+### 3. 依存関係のインストール
 
 #### uvを使用する（推奨）
 
@@ -51,7 +64,7 @@ uv add <package-name>
 uv add -r requirements.txt
 ```
 
-### 3. 仮想環境の起動
+### 4. 仮想環境の起動
 
 #### Windowsの場合
 
@@ -65,7 +78,7 @@ uv add -r requirements.txt
 source .venv/bin/activate
 ```
 
-### 4. アプリケーションの起動
+### 5. アプリケーションの起動
 
 #### バックエンドAPIの起動
 
@@ -131,8 +144,9 @@ python -m streamlit run streamlit_app.py
 
 ## データベース
 
-- DuckDBを使用した軽量なデータベース
-- データベースファイル: `duckdb.db`
+- DuckDBまたはSQLiteを使用した軽量なデータベース
+- `.env`ファイルでデータベースタイプを切り替え可能
+- データベースファイル: `todos.db`
 - 自動的にテーブルが作成されます
 
 ## 開発
@@ -143,7 +157,10 @@ python -m streamlit run streamlit_app.py
 fastapi-duckdb/
 ├── api_app.py          # FastAPIアプリケーション
 ├── streamlit_app.py    # Streamlitアプリケーション
-├── duckdb.db          # DuckDBデータベースファイル
+├── database.py         # データベース設定
+├── models.py           # データモデル
+├── .env                # 環境変数設定
+├── todos.db           # データベースファイル
 ├── pyproject.toml     # プロジェクト設定
 ├── requirements.txt    # 依存関係
 └── README.md          # このファイル
